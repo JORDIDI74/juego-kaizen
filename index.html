@@ -158,6 +158,16 @@
     <input type="file" id="fileImport" accept=".json" style="display:none">
   </div>
 
+  <div id="saludSec" style="display:none">
+    <h2>Salud del iPhone</h2>
+    <div class="h2sub">Un toque y queda apuntado en la app Salud (usa tus atajos «Kaizen …»)</div>
+    <div class="btns" style="margin-top:0">
+      <button class="btn" id="btnSaludEntreno">Apuntar entreno de hoy en Salud</button>
+      <button class="btn" id="btnSaludMedita">Apuntar meditación en Salud</button>
+      <button class="btn" id="btnSaludCintura">Apuntar cintura en Salud</button>
+    </div>
+  </div>
+
   <h2>La semana</h2>
   <div class="h2sub" id="semLabel"></div>
   <div class="sem" id="sem"></div>
@@ -515,6 +525,23 @@
     r.onload=function(){ try{ state=JSON.parse(r.result); save(); render(); toast("Backup restaurado"); }catch(e){ toast("Archivo no válido"); } };
     r.readAsText(f);
   };
+
+  // ---------- puente con la app Salud (solo iPhone/iPad, vía Atajos) ----------
+  if(/iPhone|iPad|iPod/.test(navigator.userAgent)){
+    $("saludSec").style.display="block";
+    var atajo=function(nombre,texto){
+      var u="shortcuts://run-shortcut?name="+encodeURIComponent(nombre);
+      if(texto!=null&&texto!=="") u+="&input=text&text="+encodeURIComponent(texto);
+      location.href=u;
+    };
+    $("btnSaludEntreno").onclick=function(){ atajo("Kaizen Entreno"); };
+    $("btnSaludMedita").onclick=function(){ atajo("Kaizen Meditacion"); };
+    $("btnSaludCintura").onclick=function(){
+      var v=($("cintura").value||day(HOY)._cintura||"").toString().trim();
+      if(!v){ toast("Apunta primero la cintura en su casilla"); return; }
+      atajo("Kaizen Cintura", v.replace(",","."));
+    };
+  }
 
   // ---------- candado ----------
   function hash(s){ var h=5381; s="kz·"+s; for(var i=0;i<s.length;i++){ h=((h<<5)+h+s.charCodeAt(i))|0; } return (h>>>0).toString(16); }
