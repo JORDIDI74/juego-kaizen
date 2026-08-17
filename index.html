@@ -246,6 +246,7 @@
     <div id="lockEnter" style="display:none">
       <input type="password" id="inClave" placeholder="Clave de acceso" autofocus>
       <button class="btn primary" id="btnUnlock">Abrir</button>
+      <button class="confLink" id="btnOlvido">he olvidado la clave</button>
     </div>
     <div class="lockerr" id="lockErr"></div>
     <p style="margin-top:14px">Candado de pantalla: tus datos viven solo en este navegador.<br>La clave los aparta de miradas, no los cifra.</p>
@@ -545,7 +546,7 @@
 
   // ---------- candado ----------
   function hash(s){ var h=5381; s="kz·"+s; for(var i=0;i<s.length;i++){ h=((h<<5)+h+s.charCodeAt(i))|0; } return (h>>>0).toString(16); }
-  var UNLOCK_KEY="kaizen_unlock_v1", UNLOCK_MS=12*3600*1000;
+  var UNLOCK_KEY="kaizen_unlock_v1", UNLOCK_MS=30*24*3600*1000;
   function unlocked(){ try{ var t=parseInt(localStorage.getItem(UNLOCK_KEY)||"0",10); return t && (Date.now()-t)<UNLOCK_MS; }catch(e){ return false; } }
   function setUnlocked(){ try{ localStorage.setItem(UNLOCK_KEY, String(Date.now())); }catch(e){} }
   var FRASES_ERR=["La puerta no se fuerza. Respira y recuerda.","Otra vez. Sin prisa.","La memoria también se entrena."];
@@ -557,6 +558,7 @@
       $("lockTitle").textContent="Primer acceso";
       $("lockSub").textContent="Crea tu clave y di a qué correo se envía el parte diario.";
       $("lockSetup").style.display="block";
+      $("cfEmail").value=state.config.email||"";
       $("btnSetup").onclick=function(){
         var em=$("cfEmail").value.trim(), c1=$("cfClave").value, c2=$("cfClave2").value;
         if(!em||em.indexOf("@")<1){ $("lockErr").textContent="Falta un correo válido."; return; }
@@ -576,6 +578,10 @@
       };
       $("btnUnlock").onclick=tryOpen;
       $("inClave").addEventListener("keydown",function(e){ if(e.key==="Enter") tryOpen(); });
+      $("btnOlvido").onclick=function(){
+        if(!confirm("¿Crear una clave nueva ahora mismo? Tus rachas y datos no se tocan; solo cambia la llave.")) return;
+        state.config.claveHash=null; save(); location.reload();
+      };
     }
   }
   $("btnConf").onclick=function(){
